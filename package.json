@@ -1,6 +1,6 @@
 {
   "name": "backup-folder",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Backup a big local folder to google cloud storage",
   "main": "index.js",
   "bin": {
