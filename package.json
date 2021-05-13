@@ -1,0 +1,35 @@
+{
+  "name": "backup-folder",
+  "version": "1.0.0",
+  "description": "Backup a big local folder to google cloud storage",
+  "main": "index.js",
+  "bin": {
+    "backup-folder": "index.js"
+  },
+  "author": "Hitesh Khandelwal",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hkk12369/backup-folder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hkk12369/backup-folder/issues"
+  },
+  "homepage": "https://github.com/hkk12369/backup-folder#readme",
+  "keywords": [
+    "backup",
+    "sync",
+    "backup-folder",
+    "sync-folder",
+    "rsync",
+    "google-cloud-storage",
+    "gsutil",
+    "gcloud",
+    "gcs"
+  ],
+  "dependencies": {
+    "@google-cloud/storage": "^5.8.5",
+    "chalk": "^4.1.1",
+    "commander": "^7.2.0"
+  }
+}
