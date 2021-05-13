@@ -183,6 +183,7 @@ async function main() {
 		totalUploadedSize += file.size;
 	};
 
+	let i = 0;
 	await forEach(walk(source), async (file) => {
 		if (file.path === metadataFilePath) {
 			// ignore metadata file
@@ -194,6 +195,10 @@ async function main() {
 
 		if (file.mtimeMs >= lastUploadTimeMs) {
 			await upload(file);
+		}
+
+		if (++i % 10000 === 0) {
+			console.log(chalk.blueBright(`Done ${i} files`));
 		}
 	}, {concurrency: 50});
 
