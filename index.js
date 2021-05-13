@@ -5,6 +5,7 @@ const {Storage} = require('@google-cloud/storage');
 const {program} = require('commander');
 const chalk = require('chalk');
 const package = require('./package.json');
+const {forEach} = require('async-iter-utils');
 
 const isWinows = process.platform === 'win32';
 
@@ -82,19 +83,18 @@ async function withRetries(fn, {retries = 3} = {}) {
 	throw lastError;
 }
 
-async function dirMap(dir, fn) {
-	const entries = await fs.readdir(dir, {withFileTypes: true});
-	await Promise.all(entries.map(async (d) => {
-		const entry = path.join(dir, d.name);
-		if (d.isDirectory()) {
-			await dirMap(entry, fn);
+async function* walk(dir) {
+    for await (const d of await fs.opendir(dir)) {
+        const entry = path.join(dir, d.name);
+        if (d.isDirectory()) {
+			yield* walk(entry);
 		}
-		else if (d.isFile()) {
+        else if (d.isFile()) {
 			const stats = await fs.lstat(entry);
 			stats.path = entry;
-			await fn(stats);
+			yield stats;
 		}
-	}));
+    }
 }
 
 program.version(package.version)
@@ -183,7 +183,7 @@ async function main() {
 		totalUploadedSize += file.size;
 	};
 
-	await dirMap(source, async (file) => {
+	await forEach(walk(source), async (file) => {
 		if (file.path === metadataFilePath) {
 			// ignore metadata file
 			return;
@@ -195,7 +195,7 @@ async function main() {
 		if (file.mtimeMs >= lastUploadTimeMs) {
 			await upload(file);
 		}
-	});
+	}, {concurrency: 50});
 
 	let uploadEndTime = new Date();
 	delete metadata.lastMetaData;
