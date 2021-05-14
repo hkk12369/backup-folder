@@ -24,13 +24,12 @@ Backup a local folder to google cloud storage
 
 Arguments:
   source         local folder to backup
-  destination    gcs address where backup should be uploaded (must start with
-                 gs://) (eg. gs://my-bucket/my-folder/)
+  destination    gcs address where backup should be uploaded (must start with gs://) (eg. gs://my-bucket/my-folder/)
 
 Options:
   -V, --version  output the version number
-  -p, --print    only print files to be uploaded, do not actually upload
-                 (default: false)
+  -p, --print    only print files to be uploaded, do not actually upload (default: false)
+  -q, --quiet    quiet mode, don't print the files to be uploaded to stdout (default: false)
   -h, --help     display help for command
 ```
 

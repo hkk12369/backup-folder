@@ -106,12 +106,14 @@ program.version(package.version)
 	})
 	.allowExcessArguments(false)
 	.option('-p, --print', 'only print files to be uploaded, do not actually upload', false)
+	.option('-q, --quiet', "quiet mode, don't print the files to be uploaded to stdout", false)
 	.action(() => {});
 
 const cmd = program.parse(process.argv);
 let [source, destination] = cmd.args;
 const opts = program.opts();
 const onlyPrint = opts.print;
+const quiet = opts.quiet;
 
 if (source.startsWith('gs://')) {
 	logError("source can't be a google cloud bucket");
@@ -179,7 +181,9 @@ async function main() {
 				destination: path.join(destinationDir, destination).substring(1),
 			}));
 		}
-		console.log(`${uploadedLabel} ${chalk.dim(destination)} (${chalk.bold(humanFileSize(file.size))})`);
+		if (!quiet) {
+			console.log(`${uploadedLabel} ${chalk.dim(destination)} (${chalk.bold(humanFileSize(file.size))})`);
+		}
 		totalUploadedFiles++;
 		totalUploadedSize += file.size;
 	}, {ignoreResult: true});
