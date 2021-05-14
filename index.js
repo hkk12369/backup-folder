@@ -176,6 +176,7 @@ async function main() {
 	const storageBucket = storage.bucket(bucket);
 	const uploadedLabel = onlyPrint ? 'will upload' : 'uploaded';
 
+	let fileNum = 0;
 	const upload = queue.fn(async (file) => {
 		const destination = path.relative(source, file.path);
 		if (isWinows) {
@@ -187,7 +188,7 @@ async function main() {
 			}));
 		}
 		if (!quiet) {
-			console.log(`${uploadedLabel} ${chalk.dim(destination)} (${chalk.bold(humanFileSize(file.size))})`);
+			console.log(`${chalk.dim(++fileNum)} ${uploadedLabel} ${chalk.dim(destination)} (${chalk.bold(humanFileSize(file.size))})`);
 		}
 		totalUploadedFiles++;
 		totalUploadedSize += file.size;
