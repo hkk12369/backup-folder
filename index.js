@@ -12,8 +12,13 @@ const isWinows = process.platform === 'win32';
 const storage = new Storage();
 const queue = new ParallelQueue({concurrency: 50});
 
-function logError(msg) {
-	console.error(chalk.red.bold(msg));
+function logError(e) {
+	if (e instanceof Error) {
+		console.error(chalk.red.bold(e.stack || e.message));
+	}
+	else {
+		console.error(chalk.red.bold(e));
+	}
 }
 
 /**
@@ -192,7 +197,7 @@ async function main() {
 	for await (const file of walk(source)) {
 		if (file.path === metadataFilePath) {
 			// ignore metadata file
-			return;
+			continue;
 		}
 
 		totalFiles++;
