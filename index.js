@@ -5,11 +5,12 @@ const {Storage} = require('@google-cloud/storage');
 const {program} = require('commander');
 const chalk = require('chalk');
 const package = require('./package.json');
-const {forEach} = require('async-iter-utils');
+const ParallelQueue = require('async-parallel-queue');
 
 const isWinows = process.platform === 'win32';
 
 const storage = new Storage();
+const queue = new ParallelQueue({concurrency: 50});
 
 function logError(msg) {
 	console.error(chalk.red.bold(msg));
@@ -168,7 +169,7 @@ async function main() {
 	const storageBucket = storage.bucket(bucket);
 	const uploadedLabel = onlyPrint ? 'will upload' : 'uploaded';
 
-	const upload = async (file) => {
+	const upload = queue.fn(async (file) => {
 		const destination = path.relative(source, file.path);
 		if (isWinows) {
 			destination = destination.replace(/\\/g, '/');
@@ -181,10 +182,10 @@ async function main() {
 		console.log(`${uploadedLabel} ${chalk.dim(destination)} (${chalk.bold(humanFileSize(file.size))})`);
 		totalUploadedFiles++;
 		totalUploadedSize += file.size;
-	};
+	}, {ignoreResult: true});
 
 	let i = 0;
-	await forEach(walk(source), async (file) => {
+	for await (const file of walk(source)) {
 		if (file.path === metadataFilePath) {
 			// ignore metadata file
 			return;
@@ -194,13 +195,15 @@ async function main() {
 		totalSize += file.size;
 
 		if (file.mtimeMs >= lastUploadTimeMs) {
-			await upload(file);
+			upload(file);
 		}
 
 		if (++i % 10000 === 0) {
 			console.log(chalk.blueBright(`Done ${i} files`));
 		}
-	}, {concurrency: 50});
+	}
+
+	await queue.waitIdle();
 
 	let uploadEndTime = new Date();
 	delete metadata.lastMetaData;
@@ -218,11 +221,12 @@ async function main() {
 	totalFiles++;
 	totalSize += metadataFileContents.length;
 	// upload metadata file
-	await upload({
+	upload({
 		path: metadataFilePath,
 		size: metadataFileContents.length,
 	});
 
+	await queue.waitIdle();
 	const timeTaken = uploadEndTime.getTime() - uploadStartTime.getTime();
 
 	console.log(chalk.green([
