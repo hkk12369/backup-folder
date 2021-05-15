@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "@google-cloud/storage": "^5.8.5",
-    "async-parallel-queue": "^1.0.2",
+    "async-parallel-queue": "^1.0.3",
     "chalk": "^4.1.1",
     "commander": "^7.2.0"
   }
