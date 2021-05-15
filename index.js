@@ -10,7 +10,7 @@ const ParallelQueue = require('async-parallel-queue');
 const isWinows = process.platform === 'win32';
 
 const storage = new Storage();
-const queue = new ParallelQueue({concurrency: 50});
+const queue = new ParallelQueue({concurrency: 100});
 
 function logError(e) {
 	if (e instanceof Error) {
