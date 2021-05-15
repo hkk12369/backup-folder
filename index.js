@@ -213,7 +213,15 @@ async function main() {
 		}
 	}
 
+	let filesUploaded = false;
+	if (queue.size >= 1) {
+		filesUploaded = true;
+		console.log('waiting to all files to be uploaded');
+	}
 	await queue.waitIdle();
+	if (filesUploaded) {
+		console.log('all files uploaded');
+	}
 
 	let uploadEndTime = new Date();
 	delete metadata.lastMetaData;
