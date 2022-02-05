@@ -176,16 +176,24 @@ async function main() {
 	const storageBucket = storage.bucket(bucket);
 	const uploadedLabel = onlyPrint ? 'will upload' : 'uploaded';
 
+	let errored = false;
 	let fileNum = 0;
 	const upload = queue.fn(async (file) => {
+		if (errored) return;
+
 		const destination = path.relative(source, file.path);
 		if (isWinows) {
 			destination = destination.replace(/\\/g, '/');
 		}
 		if (!onlyPrint) {
-			await withRetries(() => storageBucket.upload(file.path, {
-				destination: path.join(destinationDir, destination).substring(1),
-			}));
+			try {
+				await withRetries(() => storageBucket.upload(file.path, {
+					destination: path.join(destinationDir, destination).substring(1),
+				}));
+			}
+			catch (e) {
+				errored = true;
+			}
 		}
 		if (!quiet) {
 			console.log(`${chalk.dim(++fileNum)} ${uploadedLabel} ${chalk.dim(destination)} (${chalk.bold(humanFileSize(file.size))})`);
@@ -201,6 +209,12 @@ async function main() {
 			continue;
 		}
 
+		if (errored) {
+			await queue.waitIdle();
+			logError('exiting due to error');
+			return;
+		}
+
 		totalFiles++;
 		totalSize += file.size;
 
@@ -211,6 +225,12 @@ async function main() {
 		if (++i % 10000 === 0) {
 			console.log(chalk.blueBright(`Done ${i} files`));
 		}
+	}
+
+	if (errored) {
+		await queue.waitIdle();
+		logError('exiting due to error');
+		return;
 	}
 
 	let filesUploaded = false;

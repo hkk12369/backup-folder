@@ -63,6 +63,9 @@ typings/
 # NPM config
 .npmrc
 
+# History
+.lh
+
 # Lock files
 package-lock.json
 yarn.lock
